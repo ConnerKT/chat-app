@@ -1,19 +1,26 @@
 const express = require("express");
 const app = express();
-const ws = require("ws");
-const server = new ws.Server({ port: 3001 });
+import { createServer } from "http"
+import { Server } from "socket.io"
+const httpServer = createServer();
 
-
-server.on('connection', socket => {
-    socket.on('message', message => {
-        const b = Buffer.from(message);
-        console.log(b.toString());
-        socket.send(`${message}`)
-    })
-})
-
-app.get("/", (req, res) => {
-    res.send("Hello World!");
+const io = new Server(httpServer, {
+    cors: {
+        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500"],
+    },
 });
 
-app.listen(3002, () => console.log("Server started on port 3002"));
+io.on('connection', socket => {
+    console.log(`User ${socket.id} connected`)
+
+    socket.on('message', data => {
+        console.log(data);
+        io.emit('message',`${socket.id.substring(0,5)} says: ${data}`);
+    })
+});
+
+httpServer.listen(3001, () => 
+    console.log("Server is running on port 3001"));
+
+
+
