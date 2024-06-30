@@ -29,6 +29,8 @@ I want to implement authentication, and chat rooms.
 
 I want to deploy the application and get it live online to use with friends.
 
+I want this to be an React app on the frontend as well.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
