@@ -23,11 +23,16 @@ Contributions are welcome. Please open an issue or submit a pull request.
 
 ### Items to add
 
-Currently the application is not implementing the express side for the application, once added it will allow me to let us message specific users etc.
 
 I want to implement authentication, and chat rooms.
 
 I want to deploy the application and get it live online to use with friends.
+
+I want this to be an React app on the frontend as well.
+
+### Bug fixes
+
+My activity is broken, i'm too sleepy to fix it but will fix later
 
 ## License
 
