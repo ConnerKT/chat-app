@@ -29,7 +29,7 @@ const UsersState = {
 
 const io = new Server(expressServer, {
     cors: {
-        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500", "http://127.0.0.1:5500"],
+        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:3001", "http://127.0.0.1:3001"],
     },
 });
 
@@ -75,21 +75,33 @@ socket.on('disconnect', () => {
     userLeavesApp(socket.id)
     if (user)
         {
-            
+            io.to(user.room).emit('message', buildMsg(ADMIN, `${user.name} has left the room`))
+            io.to(user.room).emit('userList', {
+                users: getUsersInRoom(user.room)
+            })
+            io.emit('roomList', {
+                rooms: getAllActiveRooms()
+            })
         }
 })
 
     // Listening for a message event 
-    socket.on('message', data => {
-        console.log(data)
-        io.emit('message', `${socket.id.substring(0, 5)}: ${data}`)
+    socket.on('message', ({name, text}) => {
+        const room = getUser(socket.id)?.room
+        if(room)
+            {
+                io.to(room).emit('message', buildMsg(name, text))
+            }
+        
     })
-
-    
 
     // Listen for activity 
     socket.on('activity', (name) => {
-        socket.broadcast.emit('activity', name)
+        const room = getUser(socket.id)?.room
+        if(room)
+            {
+                socket.broadcast.to(room).emit('activity', name)
+            }
     })
 })
 
@@ -102,11 +114,15 @@ function buildMsg(name, text){
 }
 // user functions
 
-function activateUser(id, name, room){
-    const user = {id, name, room}
-    UsersState.setUsers([...UsersState.users.filter(user => user.id !== id), user])
+function activateUser(id, name, room) {
+    const user = { id, name, room }
+    UsersState.setUsers([
+        ...UsersState.users.filter(user => user.id !== id),
+        user
+    ])
     return user
 }
+
 function userLeavesApp(id){
     UsersState.users.filter(user => user.id !== id)
 }
@@ -118,8 +134,8 @@ function getUsersInRoom(room){
     return UsersState.users.filter(user => user.room === room)
 }
 
-function getAllActiveRooms(){
-    return Array.from(new Set(UserState.users.map(user => user.room)))
+function getAllActiveRooms() {
+    return Array.from(new Set(UsersState.users.map(user => user.room)))
 }
 
 
